@@ -26,6 +26,9 @@ export default function DitherPortrait({ src }: { src: string }) {
     let mx = -9999, my = -9999;
 
     const img = new Image();
+    // This is the hero portrait, so request it early despite rendering it on canvas.
+    img.fetchPriority = "high";
+    img.decoding = "async";
     img.src = src;
 
     type Dot = { x: number; y: number; r: number; b: number; d: number };
