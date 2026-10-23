@@ -128,9 +128,28 @@ export default function DitherPortrait({ src }: { src: string }) {
       return moving;
     };
 
+    const loop = (now: number) => {
+      raf = 0;
+      if (!alive) return;
+      const progress = Math.min(1.5, (now - start) / 1500);
+      const moving = visible && fine ? physics() : false;
+
+      if (visible && (progress < 1.5 || moving)) draw(progress);
+
+      // Stop the per-dot work when the reveal and pointer interaction settle.
+      // Pointer movement / visibility can wake the loop again when needed.
+      if ((visible && progress < 1.5) || moving) {
+        raf = requestAnimationFrame(loop);
+      }
+    };
+
     const onMove = (e: PointerEvent) => {
       const r = canvas.getBoundingClientRect();
-      mx = e.clientX - r.left; my = e.clientY - r.top;
+      mx = e.clientX - r.left;
+      my = e.clientY - r.top;
+      if (fine && visible && !reduce && raf === 0) {
+        raf = requestAnimationFrame(loop);
+      }
     };
 
     img.onload = () => {
@@ -138,17 +157,15 @@ export default function DitherPortrait({ src }: { src: string }) {
       build();
       if (reduce) { draw(1.5); return; }
       start = performance.now();
-      const loop = (now: number) => {
-        if (!alive) return;
-        const progress = Math.min(1.5, (now - start) / 1500);
-        const moving = visible && fine ? physics() : false;
-        if (visible && (progress < 1.5 || moving)) draw(progress);
-        raf = requestAnimationFrame(loop);
-      };
       raf = requestAnimationFrame(loop);
     };
 
-    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; });
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible && !reduce && raf === 0 && img.complete && img.naturalWidth) {
+        raf = requestAnimationFrame(loop);
+      }
+    });
     io.observe(canvas);
     if (fine) window.addEventListener("pointermove", onMove);
     const onResize = () => { if (img.complete && img.naturalWidth) { build(); draw(1.5); } };
