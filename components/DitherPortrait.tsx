@@ -34,7 +34,7 @@ export default function DitherPortrait({ src }: { src: string }) {
     type Dot = { x: number; y: number; r: number; b: number; d: number };
     let dots: Dot[] = [];
     let ox: Float32Array, oy: Float32Array, vx: Float32Array, vy: Float32Array;
-    let cssW = 0, cssH = 0, dpr = 1, start = 0;
+    let cssW = 0, cssH = 0, dpr = 1, start = 0, hasDrawn = false;
     const BUCKETS = 28;
     const fills: string[] = [];
     for (let i = 0; i < BUCKETS; i++) {
@@ -137,7 +137,7 @@ export default function DitherPortrait({ src }: { src: string }) {
       const progress = Math.min(1.5, (now - start) / 1500);
       const moving = visible && fine ? physics() : false;
 
-      if (visible && (progress < 1.5 || moving)) draw(progress);
+      if (visible && (progress < 1.5 || moving || !hasDrawn)) {\n        draw(progress);\n        hasDrawn = true;\n      }
 
       // Stop the per-dot work when the reveal and pointer interaction settle.
       // Pointer movement / visibility can wake the loop again when needed.
@@ -171,7 +171,7 @@ export default function DitherPortrait({ src }: { src: string }) {
     });
     io.observe(canvas);
     if (fine) window.addEventListener("pointermove", onMove);
-    const onResize = () => { if (img.complete && img.naturalWidth) { build(); draw(1.5); } };
+    const onResize = () => { if (img.complete && img.naturalWidth) { build(); draw(1.5); hasDrawn = true; } };
     window.addEventListener("resize", onResize);
 
     return () => {
