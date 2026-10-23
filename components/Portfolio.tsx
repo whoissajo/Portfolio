@@ -17,6 +17,11 @@ const SHOW_MORE_WAYS_I_BUILD = false;
 const SHOW_IDEAS_THAT_TRAVEL = false;
 const SHOW_FROM_IDEAS_TO_PEOPLE = false;
 
+const visibleNav = nav.filter((n) =>
+  (n.href !== "#content" || SHOW_IDEAS_THAT_TRAVEL) &&
+  (n.href !== "#speaking" || SHOW_FROM_IDEAS_TO_PEOPLE)
+);
+
 /* ================= small pieces ================= */
 
 /** Browser-window mockup. Shows `image` if given, otherwise a generated wireframe. */
@@ -55,10 +60,6 @@ function Mock({ url, hue, image, caption }: { url: string; hue: number; image?: 
 
 function Nav() {
   const [active, setActive] = useState("");
-  const visibleNav = nav.filter((n) =>
-    (n.href !== "#content" || SHOW_IDEAS_THAT_TRAVEL) &&
-    (n.href !== "#speaking" || SHOW_FROM_IDEAS_TO_PEOPLE)
-  );
   useEffect(() => {
     const ids = visibleNav.map((n) => n.href.slice(1));
     const els = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
