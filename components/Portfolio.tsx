@@ -12,6 +12,11 @@ import DitherPortrait from "./DitherPortrait";
 import DotField from "./DotField";
 import PixelImage from "./PixelImage";
 
+// Temporarily hide these sections; set a flag to true to show it again.
+const SHOW_MORE_WAYS_I_BUILD = false;
+const SHOW_IDEAS_THAT_TRAVEL = false;
+const SHOW_FROM_IDEAS_TO_PEOPLE = false;
+
 /* ================= small pieces ================= */
 
 /** Browser-window mockup. Shows `image` if given, otherwise a generated wireframe. */
@@ -50,8 +55,12 @@ function Mock({ url, hue, image, caption }: { url: string; hue: number; image?: 
 
 function Nav() {
   const [active, setActive] = useState("");
+  const visibleNav = nav.filter((n) =>
+    (n.href !== "#content" || SHOW_IDEAS_THAT_TRAVEL) &&
+    (n.href !== "#speaking" || SHOW_FROM_IDEAS_TO_PEOPLE)
+  );
   useEffect(() => {
-    const ids = nav.map((n) => n.href.slice(1));
+    const ids = visibleNav.map((n) => n.href.slice(1));
     const els = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); }),
@@ -64,7 +73,7 @@ function Nav() {
     <header className="nav">
       <a href="#top" className="logo serif">{site.name}</a>
       <nav className="nav-links" aria-label="Primary">
-        {nav.map((l) => (
+        {visibleNav.map((l) => (
           <a key={l.href} href={l.href} className={active === l.href.slice(1) ? "on" : ""}>{l.label}</a>
         ))}
         <a className="nav-cta" href="#contact">Let&apos;s talk <Arrow /></a>
@@ -219,7 +228,8 @@ function Work() {
             </article>
           ))}
         </div>
-        <div className="more">
+        {SHOW_MORE_WAYS_I_BUILD && (
+          <div className="more">
           <p className="mono mute" data-reveal>{work.moreLabel}</p>
           {work.more.map((m, i) => (
             <div className="more-row" key={m.n} data-reveal>
@@ -237,9 +247,12 @@ function Work() {
             </div>
           ))}
           <div className="all-link" data-reveal><a className="lnk" href={work.all.href}><span>{work.all.label}</span><Arrow dir="right" size={14} /></a></div>
-        </div>
+          </div>
+        )}
         <div className="link-row" data-stagger>
-          {work.links.map((l) => <Lnk key={l.label} href={l.href}>{l.label}</Lnk>)}
+          {work.links
+            .filter((l) => (l.href !== "#content" || SHOW_IDEAS_THAT_TRAVEL) && (l.href !== "#speaking" || SHOW_FROM_IDEAS_TO_PEOPLE))
+            .map((l) => <Lnk key={l.label} href={l.href}>{l.label}</Lnk>)}
         </div>
       </div>
     </section>
@@ -594,8 +607,8 @@ export default function Portfolio() {
           <Work />
           <Process />
           <Impact />
-          <Films />
-          <Speaking />
+          {SHOW_IDEAS_THAT_TRAVEL && <Films />}
+          {SHOW_FROM_IDEAS_TO_PEOPLE && <Speaking />}
           <Journey />
           <Contact />
         </main>
