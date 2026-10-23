@@ -60,6 +60,8 @@ function Mock({ url, hue, image, caption }: { url: string; hue: number; image?: 
 
 function Nav() {
   const [active, setActive] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     const ids = visibleNav.map((n) => n.href.slice(1));
     const els = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
@@ -70,19 +72,58 @@ function Nav() {
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
+
+  const closeMenu = () => setMenuOpen(false);
+
   return (
     <header className="nav">
-      <a href="#top" className="logo serif">{site.name}</a>
-      <nav className="nav-links" aria-label="Primary">
+      <a href="#top" className="logo serif" onClick={closeMenu}>
+        <Scramble text={site.name} />
+      </a>
+      <button
+        className={`menu-toggle${menuOpen ? " is-open" : ""}`}
+        type="button"
+        aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-expanded={menuOpen}
+        aria-controls="primary-navigation"
+        onClick={() => setMenuOpen((open) => !open)}
+      >
+        <span className="hamburger-icon" aria-hidden>
+          <i />
+          <i />
+        </span>
+      </button>
+      <nav
+        id="primary-navigation"
+        className={`nav-links${menuOpen ? " is-open" : ""}`}
+        aria-label="Primary"
+      >
         {visibleNav.map((l) => (
-          <a key={l.href} href={l.href} className={active === l.href.slice(1) ? "on" : ""}>{l.label}</a>
+          <a
+            key={l.href}
+            href={l.href}
+            className={active === l.href.slice(1) ? "on" : ""}
+            onClick={closeMenu}
+          >
+            <Scramble text={l.label} />
+          </a>
         ))}
-        <a className="nav-cta" href="#contact">Let&apos;s talk <Arrow /></a>
+        <a className="nav-cta" href="#contact" onClick={closeMenu}>
+          <Scramble text="Let's talk" /> <Arrow />
+        </a>
       </nav>
     </header>
   );
 }
-
 function MotionToggle({ off, toggle }: { off: boolean; toggle: () => void }) {
   return (
     <button className="motion-toggle mono" onClick={toggle} aria-pressed={off} aria-label="Toggle motion">
