@@ -137,7 +137,10 @@ export default function DitherPortrait({ src }: { src: string }) {
       const progress = Math.min(1.5, (now - start) / 1500);
       const moving = visible && fine ? physics() : false;
 
-      if (visible && (progress < 1.5 || moving || !hasDrawn)) {\n        draw(progress);\n        hasDrawn = true;\n      }
+      if (visible && (progress < 1.5 || moving || !hasDrawn)) {
+        draw(progress);
+        hasDrawn = true;
+      }
 
       // Stop the per-dot work when the reveal and pointer interaction settle.
       // Pointer movement / visibility can wake the loop again when needed.
