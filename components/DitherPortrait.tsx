@@ -3,6 +3,9 @@
 import { useEffect, useRef } from "react";
 import { useMotionOff } from "./MotionContext";
 
+// 0 = current dithered look; 100 = show the original portrait.
+const ORIGINAL_IMAGE_PERCENT = 0;
+
 /**
  * Renders an image as a field of tiny dots (stipple/dither look).
  * The dots scatter away from the cursor and spring back, and sweep in on load.
@@ -77,6 +80,15 @@ export default function DitherPortrait({ src }: { src: string }) {
     const draw = (progress: number) => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, cssW, cssH);
+
+      // Blend between the existing dither effect and the untouched source image.
+      const originalAlpha = Math.min(100, Math.max(0, ORIGINAL_IMAGE_PERCENT)) / 100;
+      if (originalAlpha > 0) {
+        ctx.globalAlpha = originalAlpha;
+        ctx.drawImage(img, 0, 0, cssW, cssH);
+      }
+      ctx.globalAlpha = 1 - originalAlpha;
+
       const buckets: number[][] = Array.from({ length: BUCKETS }, () => []);
       for (let i = 0; i < dots.length; i++) {
         const d = dots[i];
@@ -94,6 +106,7 @@ export default function DitherPortrait({ src }: { src: string }) {
         for (let n = 0; n < arr.length; n += 3) ctx.rect(arr[n], arr[n + 1], arr[n + 2], arr[n + 2]);
         ctx.fill();
       }
+      ctx.globalAlpha = 1;
     };
 
     const physics = () => {
