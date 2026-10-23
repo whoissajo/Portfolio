@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useMotionOff } from "./MotionContext";
 
 // 0 = current dithered look; 100 = show the original portrait.
-const ORIGINAL_IMAGE_PERCENT = 0;
+const ORIGINAL_IMAGE_PERCENT = 60;
 
 /**
  * Renders an image as a field of tiny dots (stipple/dither look).
